@@ -59,7 +59,7 @@ def generate_response(topic_name):
     response = chain.run(topic=topic_name, wiki_info=wiki_info)
     return response
 
-raw_response = generate_response("Classical Mechanics")
+raw_response = generate_response("Quantum Mechanics")
 
 def is_valid_json(json_string):
     try:

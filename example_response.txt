@@ -1,0 +1,8 @@
+Example response:
+Alright, imagine you're in a large trampoline and you drop a heavy ball in the middle. The trampoline bends around the ball, right? That's a bit like [[General Relativity|general relativity]].
+Instead of a trampoline, we have [[Spacetime|spacetime]], the fabric of our universe. Objects with mass, like our sun, warp this fabric creating a kind of well. Planets are like smaller balls rolling around the edge of this well. They're not just falling straight in, because they also have a sideways motion.
+So general relativity is Einstein's way of explaining gravity. It says gravity is not so much a force pulling objects together, but more of a curving of spacetime caused by mass and energy. This gives us a neat explanation of orbits without needing a mysterious force acting at a distance like in [[Newton's Law of Universal Gravitation|Newton's laws]].
+The cool thing about this is it predicted phenomena that were completely new like [[Gravitational Lensing|gravitational lensing]], where light bends as it passes massive objects. It even predicted [[Black Hole|black holes]], regions so heavy that not even light can escape from them.
+However, there's a catch. While general relativity works great for big things like planets and galaxies, it doesn't play nice with [[Quantum Physics|quantum physics]], the rules for tiny things like atoms and particles. We're still scratching our heads on that one.
+
+[“General Relativity”, “Spacetime”, “Newton’s Law of Universal Gravitation”, “Gravitational Lensing”, “Black Holes”, “Quantum Physics”]
