@@ -32,27 +32,27 @@ def generate_files(response):
        #time.sleep(.25)
 
         if isinstance(content, dict):  # If content is a dictionary
-            #md_content = ", ".join(f"[[{k}]]" for k in content)
             md_content = "\n".join(f"[[{k}]]" for k in content)
 
 
             # Write the content to the markdown file
             write_tool.run({"file_path": f"{name}.md", 
-                            "text": f"> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n> > [!info] Children Nodes\n{md_content}\n\n<% tp.file.cursor(1) %>"})
+                            "text": f"---\nnode_depth: {topic} -> {depth}\n---\n> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n> > [!info] Children Nodes\n{md_content}\n\n<% tp.file.cursor(1) %>"})
 
             for k, v in content.items():
                 generate_md_files(k, v, name, depth + 1)
 
         elif isinstance(content, list):  # If content is a list
-            #md_content = "\n".join(f"[[{item}]]" for item in content)
             md_content = "\n".join(f"[[{k}]]" for k in content)
             # Write the content to the markdown file
             write_tool.run({"file_path": f"{name}.md", 
-                            "text": f"> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n> > [!info] Children Nodes\n{md_content}\n\n<% tp.file.cursor(1) %>"})
+                            "text": f"---\nnode_depth: {topic} -> {depth}\n---\n> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n> > [!info] Children Nodes\n{md_content}\n\n<% tp.file.cursor(1) %>"})
 
+            # Updating before writing to the bottom nodes to get correct depth
+            depth += 1
             for subject in content:
                 write_tool.run({"file_path": f"{subject}.md", 
-                                "text": f"> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n\n<% tp.file.cursor(1) %>"})
+                                "text": f"---\nnode_depth: {topic} -> {depth}\n---\n> [!abstract]- Node Information\n>Root Topics: #{topic_tag}\nNode Depth: {topic} | {depth}\nStatus: #unexplored\nParent Nodes: [[{immediate_parent}]]\n\n<% tp.file.cursor(1) %>"})
         else:
             return
 
