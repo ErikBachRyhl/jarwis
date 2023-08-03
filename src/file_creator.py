@@ -16,7 +16,6 @@ tools = FileManagementToolkit(
 
 read_tool, write_tool, list_tool = tools
 
-
 def generate_files(response):
     main_topic = next(iter(response))
     # Start the process from the root of the response
@@ -25,22 +24,25 @@ def generate_files(response):
             generate_md_files(path=vault_directory, 
                               main_topic=main_topic, 
                               current_node=k, 
-                              childen_nodes=v, 
+                              children_nodes=v, 
                               immediate_parent=None, 
                               depth=0)
     except ValueError as e:
         print("Error:", str(e))
 
 def generate_md_files(path, main_topic, current_node, children_nodes, immediate_parent, depth):
-    #time.sleep(.25)
+    time.sleep(.175)
     topic_tag = main_topic.replace(" ", "")
     
-    if 0 <= depth < 2:
+    if depth == 0:
         current_path = f"{path}/{current_node}" # "/Users/erik/Documents/Obsidian/jArvIs/Quantum Mechanics" for example
         Path(current_path).mkdir(exist_ok=True)
         file_name = f"! {current_node}.md"
-    else:
+    elif depth == 1:
         # If depth is greater than or equal to 2, only create md file
+        current_path = path
+        file_name = f"! {current_node}.md"
+    else:
         current_path = path
         file_name = f"{current_node}.md"
 
@@ -48,7 +50,10 @@ def generate_md_files(path, main_topic, current_node, children_nodes, immediate_
     file_path = f"{current_path}/{file_name}"
 
     if isinstance(children_nodes, dict):
-        md_content = "\n".join(f"[[{k}]]" for k in children_nodes)
+        if depth != 0:
+            md_content = "\n".join(f"[[{k}]]" for k in children_nodes)
+        elif depth == 0:
+            md_content = "\n".join(f"[[! {k}]]" for k in children_nodes)
 
         # Write the children to the markdown file
         # If "Depth" is 1, it should make a directory and make the skeleton-lister an index
@@ -56,23 +61,27 @@ def generate_md_files(path, main_topic, current_node, children_nodes, immediate_
                         "text": generate_text(main_topic=main_topic, topic_tag=topic_tag, immediate_parent=immediate_parent, children_list=md_content, depth=depth, end=False)}) # <% tp.file.cursor(1) %>
 
         for k, v in children_nodes.items():
-            generate_md_files(path=current_path, main_topic=main_topic, current_node=k, children_nodes=v, immediate_parent=children_nodes, depth=depth + 1)
+            generate_md_files(path=current_path, main_topic=main_topic, current_node=k, children_nodes=v, immediate_parent=current_node, depth=depth + 1)
 
     elif isinstance(children_nodes, list):  # If children is a list
-        md_content = "\n".join(f"[[{k}]]" for k in children)
+        md_content = "\n".join(f"[[{k}]]" for k in children_nodes)
         # Write the children to the markdown file
         write_tool.run({"file_path": file_path, 
                         "text": generate_text(main_topic=main_topic, topic_tag=topic_tag, immediate_parent=immediate_parent, children_list=md_content, depth=depth, end=False)})
 
         # Updating before writing to the bottom nodes to get correct depth
         for subject in children_nodes:
-            generate_md_files(path=current_path, main_topic=main_topic, current_node=subject, children_nodes=None, immediate_parent=children_nodes, depth=depth + 1)
+            # create new markdown files for each list element
+            file_path_child = f"{current_path}/{subject}.md"
+            write_tool.run({"file_path": file_path_child, 
+                        "text": generate_text(main_topic=main_topic, topic_tag=topic_tag, immediate_parent=current_node, children_list=None, depth=depth + 1, end=True)})
     else:
         return
 
+
 def generate_text(main_topic, topic_tag, immediate_parent, children_list, depth, end):
-    text = ""
-    if end==False:
+    if immediate_parent and end==False and depth > 0:
+        subtopics = "## " + children_list.replace('\n', '\n## ')
         text = f"""---
 node_depth: {main_topic} -> {depth}
 ---
@@ -80,9 +89,28 @@ node_depth: {main_topic} -> {depth}
 > Root Topics: #{topic_tag}
 > Node Depth: {main_topic} | {depth}
 > Status: #unexplored
-> Parent Nodes: [[{immediate_parent}]]
+> Parent Nodes: [[! {immediate_parent}]]
 > > [!info] Children Nodes
 {children_list}
+
+# Subtopics
+{subtopics}
+"""
+    elif not immediate_parent and end==False and depth == 0: # Avoid main topic having a parent node of "! None.md" and children being linked without "!"
+        subtopics = "## " + children_list.replace('\n', '\n## ')
+        text = f"""---
+node_depth: {main_topic} -> {depth}
+---
+> [!abstract]- Node Information
+> Root Topics: #{topic_tag}
+> Node Depth: {main_topic} | {depth}
+> Status: #unexplored
+> Parent Nodes:
+> > [!info] Children Nodes
+{children_list}
+
+# Subject can be split into the following areas:
+{subtopics}
 """
     else:
         text = f"""---
@@ -97,7 +125,16 @@ node_depth: {main_topic} -> {depth}
     return text
 
 
-if __name__ == "__main__":
-    generate_files(response_test)
 
+
+if __name__ == "__main__":
+    # get the start time
+    st = time.time()
+    generate_files(response_test)
+    # get the end time
+    et = time.time()
+
+    # get the execution time
+    elapsed_time = et - st
+    print('Execution time:', elapsed_time, 'seconds')
     

@@ -60,7 +60,7 @@ def generate_response(topic_name):
     response = chain.run(topic=topic_name, wiki_info=wiki_info)
     return response
 
-raw_response = generate_response("Quantum Mechanics")
+raw_response = generate_response("Lagrange Equations")
 
 def is_valid_json(json_string):
     try:
