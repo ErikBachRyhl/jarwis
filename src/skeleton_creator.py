@@ -51,7 +51,8 @@ prompt = PromptTemplate(
 # Query chatGPT
 chain = LLMChain(
     llm=llm,
-    prompt=prompt
+    prompt=prompt,
+    verbose=True 
 )
     
 def generate_response(topic_name):
@@ -73,7 +74,7 @@ if is_valid_json(raw_response):
     try: 
         response = json.loads(raw_response.strip())
         generate_files(response)
-    except ValueError:
+    except ValueError as e:
         print("Error running 'generate_files'. Error:", str(e))
 else:
     print("The reponse from the LLM couldn't be parsed properly: Raw Response from LLM:\n\n", raw_response)
