@@ -38,7 +38,7 @@ from langchain.agents.agent_toolkits import FileManagementToolkit
 import node_depths
 
 # Temporary directory for llm
-working_directory = "/Users/erik/Documents/Obsidian/jArvIs"
+working_directory = "/Users/erik/Documents/Obsidian/research"
 file_management_toolkit = FileManagementToolkit(root_dir=working_directory)
 
 tools = FileManagementToolkit(

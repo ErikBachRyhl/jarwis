@@ -1,6 +1,6 @@
 import os
-import json
 from dotenv import load_dotenv
+import json
 
 # Retrieval
 from langchain.tools import WikipediaQueryRun
@@ -13,13 +13,16 @@ from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 
-from file_creator import generate_files
+# For API setup
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-llm = ChatOpenAI(temperature=0, openai_api_key=openai_api_key, model="gpt-3.5-turbo-16k-0613")
 
 template = """You are a helpful research assistant and teacher. 
 I would like you to help me understand how topics relate to each other and the strcuture of knowledge.
@@ -48,34 +51,51 @@ prompt = PromptTemplate(
     template=template
 )
 
-# Query chatGPT
-chain = LLMChain(
-    llm=llm,
-    prompt=prompt,
-    verbose=True 
-)
-    
-def generate_response(topic_name):
-    wiki_info = wikipedia.run(topic_name)
-    response = chain.run(topic=topic_name, wiki_info=wiki_info)
-    return response
+class Query(BaseModel):
+    topic: str
+    #openai_api_key: str
 
-raw_response = generate_response("Lagrange Equations")
+def generate_response(query: Query):
+    """Generates JSON valid dictionary of topic tree structure by querying wikipedia"""
+    llm = ChatOpenAI(temperature=0, openai_api_key=openai_api_key, model="gpt-3.5-turbo-16k-0613")
 
-def is_valid_json(json_string):
+    # Query chatGPT
+    chain = LLMChain(
+        llm=llm,
+        prompt=prompt,
+        verbose=True 
+    )
+
+    wiki_info = wikipedia.run(query.topic)
+    raw_response = chain.run(topic=query.topic, wiki_info=wiki_info)
+
     try:
-        json.loads(json_string.strip())
+        response = json.loads(raw_response.strip())
     except ValueError as e:
         print("Error loading response as JSON. Error:", str(e))
-        return False
-    return True
+        print("The reponse from the LLM couldn't be parsed properly: Raw Response from LLM:\n\n", raw_response)
+        return
+    
+    return response
 
-if is_valid_json(raw_response):
-    try: 
-        response = json.loads(raw_response.strip())
-        generate_files(response)
-    except ValueError as e:
-        print("Error running 'generate_files'. Error:", str(e))
-else:
-    print("The reponse from the LLM couldn't be parsed properly: Raw Response from LLM:\n\n", raw_response)
+app = FastAPI()
+
+origins = [
+    "*" # Allow everyting for now
+    #"app://obsidian.md",
+    #"http://localhost"
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/graph")
+async def api_generate_response(query: Query):
+    return generate_response(query)
 

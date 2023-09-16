@@ -34,7 +34,7 @@ def get_topic_list(directory, topic_name, depth_of_research):
     return researched, skipped
 
 if __name__ == "__main__":
-    r, s = get_topic_list('/Users/erik/Documents/Obsidian/jArvIs', 'Quantum Mechanics', 1)
+    r, s = get_topic_list('/Users/erik/Documents/Obsidian/research', 'Quantum Mechanics', 1)
     print(r)
     print(f"Number of topics about to be researched: {len(r)}. Nodes left unexplored for now: {len(s)}")
     print(s)
